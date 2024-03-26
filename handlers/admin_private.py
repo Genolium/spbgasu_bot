@@ -105,11 +105,13 @@ async def confirm_newsletter(call: types.CallbackQuery, state: FSMContext):
             except:
                 print(f"Не удалось отправить сообщение пользователю с id {user[0]}")
     await call.message.answer(f"Сообщение успешно отправлено")
+    await call.message.edit_reply_markup()
     await state.clear()
 
 @admin_private_router.callback_query(F.data == "cancel_newsletter")
 async def cancel_newsletter(call: types.CallbackQuery, state: FSMContext):
     await call.message.answer("Отправка сообщения отменена.")
+    await call.message.edit_reply_markup()
     await state.clear()
 
 # FAQ
@@ -207,7 +209,7 @@ async def quiz_creation_answer(message: types.Message, state:FSMContext):
 @admin_private_router.message(Quiz_Creation_States.waiting_for_send)
 async def send_quiz(message: types.Message, state: FSMContext):
     if(message.text=="Отмена"):
-        await message.answer("Рассылка опроса успешно отменена")
+        await message.answer("Рассылка опроса успешно отменена",reply_markup=admin_keyboard)
     elif message.text=="Сделать рассылку опроса":
             data = await state.get_data()
             quiz_question = data["txt"].split("_q")[1]
