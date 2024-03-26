@@ -105,11 +105,13 @@ async def confirm_newsletter(call: types.CallbackQuery, state: FSMContext):
             except:
                 print(f"Не удалось отправить сообщение пользователю с id {user[0]}")
     await call.message.answer(f"Сообщение успешно отправлено")
+    await call.message.edit_reply_markup()
     await state.clear()
 
 @admin_private_router.callback_query(F.data == "cancel_newsletter")
 async def cancel_newsletter(call: types.CallbackQuery, state: FSMContext):
     await call.message.answer("Отправка сообщения отменена.")
+    await call.message.edit_reply_markup()
     await state.clear()
 
 # FAQ
