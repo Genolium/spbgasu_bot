@@ -1,0 +1,35 @@
+:root {
+    --primary-color: #0000ff;
+    --secondary-color: #e2d7d3;
+    --accent-color: #7daae3;
+    --dark-color: #7994c2;
+    --text-color: #000000;
+}
+
+@font-face {
+    font-family: 'Mak';
+    src: url('mak-light.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Open';
+    src: url('open-sans.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'OpenC';
+    src: url('open-sans-condensed-regular.ttf') format('truetype');
+}
+
+.h1{
+    font-family: 'Mak' !important;
+}
+
+.brand{
+    font-size: 30px !important;
+    font-family: 'Mak';
+}
+
+* {
+    font-family: 'Open';
+}

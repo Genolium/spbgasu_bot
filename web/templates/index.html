@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Студсовет СПбГАСУ</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    </head>
+<body>
+    <header class="bg-dark text-white text-center">
+        <a class="navbar-brand brand d-md-none" href="/">СПбГАСУ</a>
+        <img class="d-none d-md-block" src="{{ url_for('static', filename='Header.jpg') }}" style="width: 100%;"></img>
+    </header>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="container">
+          <ul class="navbar-nav mx-auto flex-md-row flex-column">
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{{ url_for('users') }}">Пользователи</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{{ url_for('faq') }}">FAQ</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{{ url_for('admin_management') }}">Управление администраторами</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{{ url_for('events') }}">Мероприятия</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{{ url_for('quiz') }}">Опросы</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    <div class="container mt-3">
+        <section>
+            <h1>О сайте</h1>
+<h3>Этот сайт был создан для телеграм бота "Студсовет СПбГАСУ", с помощью него, админам предоставляется функционал добавления и изменения информации в боте.</h3>
+<br/>
+<h2 class="mt-4">Краткий экскурс по функционалу:</h2>
+
+<p>1. Пользователи:</p>
+<p>Даёт возможность посмотреть аккаунты, которые запускали бота, для каждого пользователя выводится дата активации бота и ссылка на его телеграмм.</p>
+
+<p>2. FAQ:</p>
+<p>Позволяет добавлять разделы, вопросы и ответы на них в пункт телеграм бота FAQ, помимо этого все записанные и существующие данные хранятся в виде таблицы, которую можно удалять и заполнять.</p>
+
+<p>3. Управление администраторами:</p>
+<p>Этот раздел даёт возможность добавлять и исключать админов телеграм бота, даются два поля ввода: Телеграм id и Имя Админа, записанные данные сохраняются и выводятся в виде таблицы.</p>
+
+<p>4. Мероприятия:</p>
+<p>С помощью этого пункта, админы могут добавлять даты и названия ближайших мероприятий для информирования пользователей телеграм бота, данные сохраняются в виде таблицы и могут удаляться.</p>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+</body>
+</html>
