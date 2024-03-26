@@ -209,7 +209,7 @@ async def quiz_creation_answer(message: types.Message, state:FSMContext):
 @admin_private_router.message(Quiz_Creation_States.waiting_for_send)
 async def send_quiz(message: types.Message, state: FSMContext):
     if(message.text=="Отмена"):
-        await message.answer("Рассылка опроса успешно отменена")
+        await message.answer("Рассылка опроса успешно отменена",reply_markup=admin_keyboard)
     elif message.text=="Сделать рассылку опроса":
             data = await state.get_data()
             quiz_question = data["txt"].split("_q")[1]
