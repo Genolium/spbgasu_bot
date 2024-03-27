@@ -24,7 +24,7 @@
 
    - Создайте файл с названием .env и напишите в нем:
    <code>TOKEN=</code>
-   <br/>
+
    <code>ADMIN_GROUP_ID=</code>
    
    - TOKEN - токен вашего бота, ADMIN_GROUP_ID - ID чата (группы) в Telegram, в который он будет пересылать сообщения администрации (Как узнать ID чата telegram: https://dzen.ru/a/Y8mvM0IEN0exrcSu).
