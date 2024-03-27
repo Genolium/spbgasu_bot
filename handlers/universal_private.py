@@ -11,10 +11,10 @@ from utility.db import *
 from utility.states import *
 
 universal_router=Router()
+
 # ОТВЕТ НА ВОПРОС ИЗ ГРУППЫ АДМИНОВ
 @universal_router.message(F.chat.id)
 async def answer_to_user(message: types.Message, state: FSMContext):
-    #pprint(indent=3, width=80, depth=3, object=b)
     if message.reply_to_message:
         if str(message.chat.id) == str(ADMIN_GROUP_ID) and  message.reply_to_message.forward_origin.sender_user.id is not None:
             await bot.send_message(chat_id=message.reply_to_message.forward_origin.sender_user.id, text="*Вам пришел ответ от администрации\! *\n", parse_mode=ParseMode.MARKDOWN_V2)

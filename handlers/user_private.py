@@ -15,7 +15,8 @@ user_router = Router()
 
 @user_router.message(CommandStart())
 @flags.chat_action(action="upload_photo", interval=3)
-async def cmd_start(message: types.Message):
+async def cmd_start(message: types.Message, state: FSMContext):
+    await state.clear()
     image = FSInputFile("static/Post.jpg")
     if not get_user(message.from_user.id):
        add_user(message.from_user.id)
@@ -24,6 +25,7 @@ async def cmd_start(message: types.Message):
 🗣 Задавать интересующие тебя вопросы;
 🙋🙋‍♂️ Учавствовать в различных  опросах;
 🤝 Узнавать  даты важных событий/мероприятий вуза;
+
 
 Пожалуйста, *не стесняйся спрашивать*, я с радостью отвечу 💭 на твои вопросы 🤔, если же ты не можешь найти ответа, пиши обращение 📨 в студенческий совет, тебе обязательно помогут\.'''
 ,reply_markup=main_keyboard, parse_mode=ParseMode.MARKDOWN_V2)
@@ -37,8 +39,8 @@ async def buy_list(message: types.Message):
     events = get_event()
     res = ""
     for event in events:
-        res += f"{event[1]} - {event[2]}\n"
-    await message.answer_photo(photo=image, caption='🗓️📢 *Календарь* содержит даты и названия ближайших *событий/мероприятий* вуза 🏫\.\nДля подробной информации выбирай ниже👇\n\n'+res.replace('.','\.').replace('-','\-'), parse_mode=ParseMode.MARKDOWN_V2)
+        res += f"🗓️  {event[1]} - {event[2]}\n"
+    await message.answer_photo(photo=image, caption='<b>📢Календарь мероприятий</b> содержит даты и названия ближайших <b>событий/мероприятий</b> вуза 🏫.\nДля подробной информации выбирай ниже👇\n\n'+ res, parse_mode=ParseMode.HTML)
 
 # ID    
 @user_router.message(Command('id'))
@@ -66,16 +68,17 @@ async def forward_message_to_admins(message: types.Message, state: FSMContext):
         a = message.from_user.id
         button_url = f'tg://user?id={a}'
         markup = types.InlineKeyboardMarkup(inline_keyboard=[[types.InlineKeyboardButton(text="Ссылка", url=button_url)]])
-        await bot.send_message(chat_id=getenv("ADMIN_GROUP_ID"),text=f"Новое сообщение от пользователя с id {message.from_user.id}\nСсылка на id {a}: <a href='tg://user?id={a}'>ссылка</a>", parse_mode=ParseMode.HTML)
-        await message.forward(getenv('ADMIN_GROUP_ID'))
-        await state.set_state(Ask_Admin_States.waiting_for_reply)
-        await state.update_data(original_message=message)
+        forwarded_message =  await message.forward(getenv('ADMIN_GROUP_ID'))
+        if forwarded_message.forward_from == None:
+            await bot.send_message(chat_id=getenv("ADMIN_GROUP_ID"),text=f"Новое сообщение от пользователя, который скрыл свой профиль при пересылке, с id {message.from_user.id}\nСсылка на пользователя: <a href='tg://user?id={a}'>ссылка</a>", parse_mode=ParseMode.HTML)
         await message.answer("✅*Сообщение успешно отправлено* в Студенческий совет и уже обрабатывается, время ответа зависит от количества заявок\.",parse_mode=ParseMode.MARKDOWN_V2, reply_markup=main_keyboard)
+        await state.clear()
 
 
 # Получение списка групп вопросов FAQ
 @user_router.message(F.text=='FAQ📋')
-async def show_faq_groups(message: types.Message):
+async def show_faq_groups(message: types.Message, state: FSMContext):
+    await state.clear()
     groups = get_faq_groups()
     buttons = [] 
     for group in groups:
@@ -123,7 +126,8 @@ async def show_faq_questions(call: types.CallbackQuery):
             await call.message.answer(reply_markup=keyboard)
 
 @user_router.message(F.text=='Наши контакты📞')
-async def contact_list(message: types.Message):
+async def contact_list(message: types.Message,state: FSMContext):
+    await state.clear()
     image = FSInputFile("static/Nets.jpg")
     buttons = []
     buttons.append(types.InlineKeyboardButton(text = '🅱Контакте', url="https://vk.com/ssspbgasu"))

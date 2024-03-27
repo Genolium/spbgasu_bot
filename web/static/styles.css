@@ -33,3 +33,7 @@
 * {
     font-family: 'Open';
 }
+
+ol, li, li h3{
+    font-size: 18px !important;
+}

@@ -15,16 +15,10 @@ def create_db():
                  (id INTEGER PRIMARY KEY, question TEXT, answer_options TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS quizes_responces
                  (id INTEGER PRIMARY KEY, tg_id INTEGER, quiz_id INTEGER, answer_number INTEGER)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS requests
-                 (id INTEGER PRIMARY KEY, tg_id INTEGER, request_time TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS events
                  (id INTEGER PRIMARY KEY, name TEXT, date TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS newsletters
                  (id INTEGER PRIMARY KEY, text TEXT, sender_id INTEGER)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS resources
-                 (id INTEGER PRIMARY KEY, name TEXT, link TEXT)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS giveaways
-                 (id INTEGER PRIMARY KEY, winners_count INTEGER, result_date TEXT, winner TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS banned_users
                  (id INTEGER PRIMARY KEY, tg_id INTEGER)''')
     conn.commit()
@@ -113,14 +107,17 @@ def get_all_admins():
 def add_admin(tg_id, username, login, password):
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
-    c.execute("INSERT INTO admins (tg_id, username, login, password) VALUES (?, ?, ?, ?)", (tg_id, username, login, password))
-    conn.commit()
+    c.execute("SELECT * FROM admins WHERE login = ?", (login,))
+    existing_admin = c.fetchone()
+    if not existing_admin:
+        c.execute("INSERT INTO admins (tg_id, username, login, password) VALUES (?, ?, ?, ?)", (int(tg_id), str(username), str(login), str(password)))
+        conn.commit()
     conn.close()
 
 def delete_admin(tg_id):
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
-    c.execute("DELETE FROM admins WHERE tg_id = ?", (tg_id,))
+    c.execute("DELETE FROM admins WHERE tg_id = ?", (int(tg_id),))
     conn.commit()
     conn.close()
 
@@ -172,7 +169,9 @@ def get_quiz_name(quiz_id):
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
     c.execute("SELECT question FROM quizes WHERE id = ?", (quiz_id,))
-    name = c.fetchone()[0]
+    name = c.fetchone()
+    if name:
+        name = name[0]
     conn.close()
     return name
 
@@ -199,12 +198,14 @@ def get_faq(question_group=None, question=None, id=None):
     c = conn.cursor()
     if question_group and question:
         c.execute("SELECT * FROM faq WHERE question_group = ? AND question = ?", (question_group, question))
+    elif id==-1:
+        c.execute("SELECT * FROM faq")
     elif id:
         c.execute("SELECT * FROM faq WHERE id = ?", (id,))
     elif question_group:
         c.execute("SELECT * FROM faq WHERE question_group = ?", (question_group,))
     elif question:
-        c.execute("SELECT * FROM faq WHERE question = ?", (question,))
+        c.execute("SELECT * FROM faq WHERE question = ?", (question,))    
     else:
         c.execute("SELECT * FROM faq")
         faq_data = {}

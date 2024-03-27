@@ -1,9 +1,10 @@
-from flask import Flask, Response, render_template, request, redirect, url_for, session
+from flask import Flask, Response, render_template, request, redirect, url_for, make_response
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 from utility.db import *
 from utility.util import *
 
+# СОЗДАНИЕ ВЕБ-ПРИЛОЖЕНИЯ НА FLASK
 app = Flask(__name__)
 auth = HTTPBasicAuth()
 
@@ -13,8 +14,13 @@ def verify_password(username, password):
         return username
 
 @app.route('/')
+@auth.login_required(optional=True)
 def index():
-    return render_template('index.html')
+    a = auth.current_user()
+    if a!=None:
+        return render_template('index.html', username=a)
+    else:
+        return render_template('index.html', username="anonymous")
 
 @app.route('/users', methods=['GET', 'POST'])
 @auth.login_required
@@ -34,8 +40,12 @@ def faq():
         return redirect(url_for('faq'))
 
     faq_list = get_faq()
-    print(faq_list)
-    return render_template('faq.html', faq=faq_list)
+    full_list = get_faq(id=-1)
+    print(full_list)
+    l = dict()
+    for i in full_list:
+        l[i[2]]=i[0]
+    return render_template('faq.html', faq=faq_list, flist=l)
 
 @app.route('/faq/delete', methods=['GET'])
 @auth.login_required
@@ -57,7 +67,7 @@ def admin_management():
             add_admin(tg_id, username, login, password)
         elif 'delete_admin' in request.form:
             tg_id = request.form['tg_id']
-            delete_admin(tg_id)
+            delete_admin((tg_id,))
     admins = get_all_admins()
     return render_template('admin_management.html', admins=admins)
 
@@ -68,8 +78,7 @@ def events():
     if request.method == 'POST':
         name = request.form['name']
         date = request.form['date']
-        event_id = request.form['event_id']
-        
+        event_id = request.form['event_id']        
         
         if event_id:
             # Обновление существующего события
@@ -106,30 +115,31 @@ def quiz():
 @app.route('/ban_user/<tg_id>', methods=['POST'])
 @auth.login_required
 def ban_user(tg_id):
-    print(tg_id)
     setBanUser(tg_id, True)
     return redirect('/users')
 
 @app.route('/unban_user/<tg_id>', methods=['POST'])
 @auth.login_required
 def unban_user(tg_id):
-    print(tg_id)
     setBanUser(tg_id, False)
     return redirect('/users')
 
-@app.route('/logout')
 @auth.login_required
+@app.route('/logout')
 def logout():
-    return Response('Logout Successful', status=401)
+    response = make_response('Logout Successful', 401)
+    response.headers['Location'] = '/'  # Устанавливаем заголовок Location для редиректа
+    return response
 
 @app.route('/faq/edit/', methods=['GET', 'POST'])
 @auth.login_required
 def editfaq():
     if request.method == 'POST':
+        id = request.args.get('id')
         question_group = request.form['question_group']
         question = request.form['question']
         answer = request.form['answer']
-        edit_faq(get_faq(question_group,question)[0][0],question_group, question, answer)
+        edit_faq(id,question_group, question, answer)
         return redirect(url_for('faq'))
 
     question_group = request.args.get('question_group')

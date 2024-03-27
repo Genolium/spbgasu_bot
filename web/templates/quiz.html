@@ -28,7 +28,7 @@
             <button class="btn btn-dark my-2" type="submit">Посмотреть результаты</button>
         </form>
         {% endif %}
-        {% if not quiz_list %}
+        {% if not quiz_list and not chart %}
         <p>К сожалению, опросов ещё не было. Перейдите в бот, чтобы создать новый опрос</p>
         {% endif %}
 

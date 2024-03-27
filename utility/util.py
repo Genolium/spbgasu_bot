@@ -2,7 +2,7 @@ import io, base64
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 from matplotlib import rcParams
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, types
 from aiogram.fsm.storage.memory import MemoryStorage
 from os import getenv
 from dotenv import find_dotenv, load_dotenv
@@ -12,6 +12,14 @@ bot = Bot(token=getenv('TOKEN'))
 dp = Dispatcher(storage=MemoryStorage())
 ADMIN_GROUP_ID = getenv("ADMIN_GROUP_ID")
 
+async def on_startup(dp):
+    commands = [
+        types.BotCommand(command="/start", description="Начать"),
+        types.BotCommand(command="/help", description="Помощь"),
+        # Другие команды здесь
+    ]
+    await bot.set_my_commands(commands)
+  
 def chunk_list(lst, n):
     return [lst[i:i+n] for i in range(0, len(lst), n)]
 

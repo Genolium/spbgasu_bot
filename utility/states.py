@@ -17,6 +17,8 @@ class Event_States(StatesGroup):
 class Add_Admin_States(StatesGroup):
     waiting_for_username = State()
     waiting_for_id = State()
+    waiting_for_login = State()
+    waiting_for_password = State()
 
 class Delete_Admin_States(StatesGroup):
     waiting_for_id = State()

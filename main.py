@@ -19,7 +19,7 @@ dp.include_router(universal_router)
 async def run_bot():
     await bot.delete_webhook(drop_pending_updates=True)
     await bot.delete_my_commands(scope=types.BotCommandScopeAllPrivateChats())
-    await dp.start_polling(bot)
+    await dp.start_polling(bot, on_startup=on_startup)
 
 async def run_web():
     await app.run(debug=True)

@@ -53,8 +53,8 @@
                         <td>{{ question }}</td>
                         <td>{{ answer }}</td>
                         <td>
-                            <a href="{{ url_for('editfaq', question_group=group, question=question, answer=answer) }}" class="btn btn-dark btn-sm m-2">Редактировать</a>
-                            <a href="{{ url_for('deletefaq', question_group=group, question=question, answer=answer) }}" class="btn btn-danger btn-sm m-2">Удалить</a>
+                            <a href="{{ url_for('editfaq', id=flist[question], question_group=group, question=question, answer=answer) }}" class="btn btn-dark btn-sm m-2">Редактировать</a>
+                            <a href="{{ url_for('deletefaq',  question_group=group, question=question, answer=answer) }}" class="btn btn-danger btn-sm m-2">Удалить</a>
                         </td>
                     </tr>
                     {% endfor %}
