@@ -196,11 +196,11 @@ async def get_event_date(message: types.Message, state: FSMContext):
         date_str = message.text
         await state.update_data(date=date_str)
         user_data = await state.get_data()
-        add_event(user_data["name"], user_data["date"].strftime("%Y-%m-%d"))
+        add_event(user_data["name"], user_data["date"])
         await message.answer(f"✅Дата {date_str} была сохранена в базе данных.",reply_markup=advanced_keyboard)
         await state.clear()
     except ValueError:
-        await message.answer("❌*Неверный формат даты*\. Пожалуйста, введите дату в формате'дд\.мм\.гггг'\.", parse_mode=ParseMode.MARKDOWN_V2)
+        await message.answer("❌*Неверный формат*", parse_mode=ParseMode.MARKDOWN_V2)
         await state.set_state(Event_States.waiting_for_datetime)
 
 # СОЗДАНИЕ ОПРОСНИКА
