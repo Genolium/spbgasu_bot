@@ -14,7 +14,7 @@
     {% include 'header.html' %}
 <div class="p-3 container">
     <h1>Редактирование FAQ</h1>
-    <form class="my-5" method="POST">
+    <form class="my-5" method="POST" onsubmit="return validateForm()">
         <div class="form-group">
             <label class="form-label" for="question_group">Группа вопросов:</label>
             <input class="form-control" type="text" id="question_group" name="question_group" value="{{ question_group }}" required>
@@ -30,6 +30,18 @@
         <button class="btn btn-dark my-2" type="submit">Сохранить изменения</button>
     </form>
 </div>
+<script>
+    function validateForm() {
+        var formElements = document.querySelectorAll("form [required]");
+        for (var i = 0; i < formElements.length; i++) {
+            if (formElements[i].value.trim() === "") {
+                alert("Пожалуйста, заполните все обязательные поля.");
+                return false;
+            }
+        }
+        return true;
+    }
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
         integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
         crossorigin="anonymous"></script>

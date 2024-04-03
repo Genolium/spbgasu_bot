@@ -1,6 +1,7 @@
 import io, base64
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
+import pandas as pd
 from matplotlib import rcParams
 from aiogram import Bot, Dispatcher, types
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -60,3 +61,8 @@ def generate_chart(data):
     img.seek(0)
     chart_base64 = base64.b64encode(img.getvalue()).decode()
     return chart_base64
+
+
+def clean_sheet_name(name):
+    # Замена недопустимых символов на допустимые
+    return name.replace('?', '').replace('/', '-').replace('\\', '-')

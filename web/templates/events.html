@@ -16,7 +16,7 @@
     <div class="p-3 container">
     <h1>Мероприятия</h1>
     <h2>Добавить мероприятие</h2>
-        <form method="post">
+        <form method="post" onsubmit="return validateForm()">
             <input type="hidden" name="event_id" value="">
             <div class="form-group">
                 <label for="name">Имя:</label>
@@ -58,7 +58,18 @@
         </div>
                 
         </div> 
-
+        <script>
+            function validateForm() {
+                var formElements = document.querySelectorAll("form [required]");
+                for (var i = 0; i < formElements.length; i++) {
+                    if (formElements[i].value.trim() === "") {
+                        alert("Пожалуйста, заполните все обязательные поля.");
+                        return false;
+                    }
+                }
+                return true;
+            }
+        </script>    
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
     integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
     crossorigin="anonymous"></script>

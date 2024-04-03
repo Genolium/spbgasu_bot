@@ -112,7 +112,7 @@ async def send_newsletter(message: types.Message, state: FSMContext):
 async def get_newsletter_content(message: types.Message, state: FSMContext):
     await state.update_data(content=message)
 
-    if message.text.lower()=="отмена":
+    if message.text and message.text.lower()=="отмена":
         await message.answer("✅Создание рассылки *отменено*\.", parse_mode=ParseMode.MARKDOWN_V2,reply_markup=admin_keyboard)
         await state.clear()
         return
