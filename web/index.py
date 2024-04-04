@@ -69,7 +69,7 @@ def admin_management():
             add_admin(tg_id, username, login, password)
         elif 'delete_admin' in request.form:
             tg_id = request.form['tg_id']
-            delete_admin((tg_id,))
+            delete_admin((tg_id))
     admins = get_all_admins()
     return render_template('admin_management.html', admins=admins)
 
@@ -80,13 +80,14 @@ def events():
     if request.method == 'POST':
         name = request.form['name']
         date = request.form['date']
+        description = request.form['description']
         event_id = request.form['event_id']        
         
         if event_id:
             # Обновление существующего события
-            edit_event(event_id, name, date)
+            edit_event(event_id, name, date,description)
         else:
-            add_event(name,date)
+            add_event(name,date,description)
         return redirect('/events')
     events = get_event()
     return render_template('events.html', events=events)
@@ -156,6 +157,7 @@ def editevent():
     if request.method == 'POST':
         name = request.form['name']
         date = request.form['date']
-        edit_event(id,name,date)
+        description = request.form['description']
+        edit_event(id,name,date,description)
         return redirect(url_for('events'))
     return render_template('event_edit.html', event=get_event(id))

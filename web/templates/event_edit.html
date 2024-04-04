@@ -23,6 +23,10 @@
             <label class="form-label" for="question">Дата:</label>
             <input class="form-control" type="text" id="question" name="date" value="{{ event[0][2] }}" required>
         </div>
+        <div class="form-group">
+            <label class="form-label" for="question_group">Описание:</label>
+            <input class="form-control" type="text" id="question_group" name="description" value="{{ event[0][3] }}" required>
+        </div>
         <button class="btn btn-dark my-2" type="submit">Сохранить изменения</button>
     </form>
 </div>

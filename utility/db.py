@@ -18,7 +18,7 @@ def create_db():
     c.execute('''CREATE TABLE IF NOT EXISTS quizes_responces
                  (id INTEGER PRIMARY KEY, tg_id INTEGER, quiz_id INTEGER, answer_number INTEGER)''')
     c.execute('''CREATE TABLE IF NOT EXISTS events
-                 (id INTEGER PRIMARY KEY, name TEXT, date TEXT)''')
+                 (id INTEGER PRIMARY KEY, name TEXT, date TEXT,description TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS newsletters
                  (id INTEGER PRIMARY KEY, text TEXT, sender_id INTEGER)''')
     c.execute('''CREATE TABLE IF NOT EXISTS banned_users
@@ -69,10 +69,10 @@ def add_request(tg_id):
     conn.commit()
     conn.close()
 
-def add_event(name, date):
+def add_event(name, date, description):
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
-    c.execute("INSERT INTO events (name, date) VALUES (?, ?)", (name, date))
+    c.execute("INSERT INTO events (name, date, description) VALUES (?, ?, ?)", (name, date,description))
     conn.commit()
     conn.close()
 
@@ -341,10 +341,10 @@ def delete_quiz(quiz_id):
     conn.commit()
     conn.close()
 
-def edit_event(event_id, name, date):
+def edit_event(event_id, name, date,description):
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
-    c.execute("UPDATE events SET name = ?, date = ? WHERE id = ?", (name, date, event_id))
+    c.execute("UPDATE events SET name = ?, date = ?, description = ? WHERE id = ?", (name, date,description, event_id))
     conn.commit()
     conn.close()
 
