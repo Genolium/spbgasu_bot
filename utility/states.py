@@ -13,6 +13,7 @@ class FAQ_States(StatesGroup):
 class Event_States(StatesGroup):
     waiting_for_name = State()
     waiting_for_datetime = State()
+    waiting_for_description = State()
 
 class Add_Admin_States(StatesGroup):
     waiting_for_username = State()

@@ -195,13 +195,20 @@ async def get_event_date(message: types.Message, state: FSMContext):
     try:
         date_str = message.text
         await state.update_data(date=date_str)
-        user_data = await state.get_data()
-        add_event(user_data["name"], user_data["date"])
-        await message.answer(f"✅Дата {date_str} была сохранена в базе данных.",reply_markup=advanced_keyboard)
-        await state.clear()
+        await message.answer(f"✅Дата {date_str} была сохранена в базе данных.")
+        await message.answer("✍️Введите *описание* мероприятия\:",parse_mode=ParseMode.MARKDOWN_V2)
+        await state.set_state(Event_States.waiting_for_description)
     except ValueError:
         await message.answer("❌*Неверный формат*", parse_mode=ParseMode.MARKDOWN_V2)
         await state.set_state(Event_States.waiting_for_datetime)
+
+@admin_private_router.message(Event_States.waiting_for_description)
+async def get_event_date(message: types.Message, state: FSMContext):
+    await state.update_data(description=message.text)
+    user_data = await state.get_data()
+    add_event(user_data["name"],user_data["date"],user_data["description"])
+    await message.answer(f"✅Описание было сохранено в базе данных.",reply_markup=advanced_keyboard)
+    await state.clear()
 
 # СОЗДАНИЕ ОПРОСНИКА
 @admin_private_router.message(F.text == "🗳️Создать опрос")
