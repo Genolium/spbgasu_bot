@@ -30,18 +30,31 @@ async def cmd_start(message: types.Message, state: FSMContext):
 Пожалуйста, *не стесняйся спрашивать*, я с радостью отвечу 💭 на твои вопросы 🤔, если же ты не можешь найти ответа, пиши обращение 📨 в студенческий совет, тебе обязательно помогут\.'''
 ,reply_markup=main_keyboard, parse_mode=ParseMode.MARKDOWN_V2)
 
-
-
 # КАЛЕНДАРЬ МЕРОПРИЯТИЙ
 @user_router.message(F.text=='Календарь мероприятий🗓️')
 async def buy_list(message: types.Message):
     image = FSInputFile("static/Events.jpg")
     events = get_event()
     res = ""
+    buttons=[]
     for event in events:
-        res += f"🗓️  {event[1]} - {event[2]}\n"
-    await message.answer_photo(photo=image, caption='<b>📢Календарь мероприятий</b> содержит даты и названия ближайших <b>событий/мероприятий</b> вуза 🏫.\nДля подробной информации выбирай ниже👇\n\n'+ res, parse_mode=ParseMode.HTML)
+        buttons.append(types.InlineKeyboardButton(text=f'🗓️  {event[1]} - {event[2]}',callback_data=f'event_{event[0]}'))
+    event_keyborad = types.InlineKeyboardMarkup(inline_keyboard=chunk_list(buttons,1))
+    await message.answer_photo(photo=image, caption='<b>📢Календарь мероприятий</b> содержит даты и названия ближайших <b>событий/мероприятий</b> вуза 🏫.\nДля подробной информации выбирай ниже👇',reply_markup=event_keyborad, parse_mode=ParseMode.HTML)
 
+
+@user_router.callback_query(F.data.startswith("event_"))
+async def show_event_description(call: types.CallbackQuery):
+    data = call.data.split('_')
+    if(data[1]!='back'):
+        description = get_event(event_id=data[1])[0][3]
+        if call.message.text:
+            await call.message.edit_text(str(description), parse_mode=ParseMode.HTML)
+        else:
+            await call.message.answer(str(description), parse_mode=ParseMode.HTML)
+    else:
+        await bot.delete_message(call.message.chat.id, call.message.message_id)
+        
 # ID    
 @user_router.message(Command('id'))
 async def print_usr_id(message: types.Message):

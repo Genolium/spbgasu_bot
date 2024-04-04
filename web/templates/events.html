@@ -20,11 +20,15 @@
             <input type="hidden" name="event_id" value="">
             <div class="form-group">
                 <label for="name">Имя:</label>
-                <input type="text" class="form-control" name="name" required>
+                <input type="text" class="form-control" id="name" name="name" required>
             </div>
             <div class="form-group">
                 <label for="date">Дата:</label>
                 <input type="text" class="form-control" id="datepicker" name="date" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Описание</label>
+                <textarea style="height:100px;" class="form-control" id="description" name="description" required></textarea>
             </div>
             <button type="submit" class="btn btn-dark my-2">Сохранить</button>
         </form>
@@ -36,6 +40,7 @@
                     <th>ID</th>
                     <th>Название</th>
                     <th>Дата</th>
+                    <th>Описание</th>
                     <th>Действия</th>
                 </tr>
             </thead>
@@ -45,6 +50,7 @@
                     <td>{{ event[0] }}</td>
                     <td>{{ event[1] }}</td>
                     <td>{{ event[2] }}</td>
+                    <td>{{ event[3] }}</td>
                     <td>
                         <a href="{{ url_for('editevent', id=event[0]) }}" class="btn btn-dark btn-sm m-2">Редактировать</a>
                         <form action="/events/delete/{{ event[0] }}" method="post">
