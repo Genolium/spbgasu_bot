@@ -6,7 +6,7 @@ from aiogram.enums import ParseMode
 from datetime import date
 from werkzeug.security import generate_password_hash
 from filters.is_admin import IsAdminIDFilter
-from keyboardrs.admin_keyboards import admin_keyboard
+from keyboardrs.admin_keyboards import *
 from keyboardrs.quiz_create_keyboard import quiz_keyboard
 from keyboardrs.advanced_admin import advanced_keyboard
 from utility.util import *
@@ -180,13 +180,22 @@ async def get_answer(message: types.Message, state: FSMContext):
 @admin_private_router.message(F.text == "📅🖋️Добавить мероприятие в календарь")
 async def start_add_event(message: types.Message, state: FSMContext):
     await state.clear()
-    await message.answer("✍️Введите *название* мепроприятия\:", reply_markup=types.reply_keyboard_remove.ReplyKeyboardRemove(),parse_mode=ParseMode.MARKDOWN_V2)
+    await message.answer("✍️Введите *название* мероприятия\:", reply_markup=types.reply_keyboard_remove.ReplyKeyboardRemove(),parse_mode=ParseMode.MARKDOWN_V2)
     await state.set_state(Event_States.waiting_for_name)
 
 @admin_private_router.message(Event_States.waiting_for_name)
 async def get_event_name(message: types.Message, state: FSMContext):
     name = message.text
     await state.update_data(name=name)
+    await message.answer("📷Пришлите *фото* для обложки мероприятия\:", parse_mode=ParseMode.MARKDOWN_V2)
+    await state.set_state(Event_States.waiting_for_photo)
+
+@admin_private_router.message(Event_States.waiting_for_photo, F.content_type == types.ContentType.PHOTO)
+async def get_event_name(message: types.Message, state: FSMContext):
+    photo = message.photo[-1]
+    file_id = photo.file_id
+    await state.update_data(photo=photo)
+    await state.update_data(file_id=file_id)
     await message.answer("✍️Введите *дату* мероприятия\:", parse_mode=ParseMode.MARKDOWN_V2)
     await state.set_state(Event_States.waiting_for_datetime)
 
@@ -195,7 +204,6 @@ async def get_event_date(message: types.Message, state: FSMContext):
     try:
         date_str = message.text
         await state.update_data(date=date_str)
-        await message.answer(f"✅Дата {date_str} была сохранена в базе данных.")
         await message.answer("✍️Введите *описание* мероприятия\:",parse_mode=ParseMode.MARKDOWN_V2)
         await state.set_state(Event_States.waiting_for_description)
     except ValueError:
@@ -206,7 +214,7 @@ async def get_event_date(message: types.Message, state: FSMContext):
 async def get_event_date(message: types.Message, state: FSMContext):
     await state.update_data(description=message.text)
     user_data = await state.get_data()
-    add_event(user_data["name"],user_data["date"],user_data["description"])
+    add_event(user_data["name"],user_data["date"],user_data["description"], user_data["file_id"])
     await message.answer(f"✅Описание было сохранено в базе данных.",reply_markup=advanced_keyboard)
     await state.clear()
 
@@ -291,3 +299,40 @@ async def advanced_options(message: types.Message, state:FSMContext):
 async def advanced_options(message: types.Message, state:FSMContext):
     await state.clear()
     await message.answer("👉Вы *вышли* из расширенных настроек\.",reply_markup=admin_keyboard, parse_mode=ParseMode.MARKDOWN_V2)
+
+# РЕЖИМ ПОЛЬЗОВАТЕЛЯ
+@admin_private_router.message(F.text == "🫥Режим пользователя")
+async def advanced_options(message: types.Message, state:FSMContext):
+    await state.clear()
+    await message.answer("👉Вы *перешли* в режим простого пользователя\.",reply_markup=fake_user_keyboard, parse_mode=ParseMode.MARKDOWN_V2)
+# ВЫХОД ИЗ РЕЖИМА ПОЛЬЗОВАТЕЛЯ    
+@admin_private_router.message(F.text == "Вернуться⏪")
+async def advanced_options(message: types.Message, state:FSMContext):
+    await state.clear()
+    await message.answer("👉Вы *вышли* из режима простого пользователя\. Поздравляем с возвращением\!",reply_markup=admin_keyboard, parse_mode=ParseMode.MARKDOWN_V2)
+
+#Изменение фото в мероприятии
+@admin_private_router.message(F.text == "🖋️🎥Изменить фото в мероприятии")
+async def change_photo_1(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer("📷Введите id мероприятия, у которого вы хотите изменить обложку\:", parse_mode=ParseMode.MARKDOWN_V2)
+    await state.set_state(Change_Photo_States.waiting_for_num)
+
+@admin_private_router.message(Change_Photo_States.waiting_for_num)
+async def change_photo_2(message: types.Message, state: FSMContext):
+    await state.clear()
+    if get_event(message.text):
+        await state.update_data(id=message.text)
+        await message.answer("📷Пришлите новое *фото* для обложки мероприятия\:", parse_mode=ParseMode.MARKDOWN_V2)
+        await state.set_state(Change_Photo_States.waiting_for_new_photo)
+
+@admin_private_router.message(Change_Photo_States.waiting_for_new_photo,F.content_type == types.ContentType.PHOTO)
+async def change_photo_3(message: types.Message, state: FSMContext):
+    photo = message.photo[-1]
+    file_id = photo.file_id
+    user_data = await state.get_data()
+    id=user_data["id"]
+    event = get_event(id)[0]
+    edit_event(event[0],event[1],event[2],event[3],file_id)
+    await message.answer(f"✅Фото мероприятия было обновлено.",reply_markup=advanced_keyboard)
+    await state.clear()

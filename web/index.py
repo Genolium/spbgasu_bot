@@ -158,6 +158,6 @@ def editevent():
         name = request.form['name']
         date = request.form['date']
         description = request.form['description']
-        edit_event(id,name,date,description)
+        edit_event(id,name,date,description,get_event(id)[0][4])
         return redirect(url_for('events'))
     return render_template('event_edit.html', event=get_event(id))

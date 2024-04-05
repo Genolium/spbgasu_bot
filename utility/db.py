@@ -18,7 +18,7 @@ def create_db():
     c.execute('''CREATE TABLE IF NOT EXISTS quizes_responces
                  (id INTEGER PRIMARY KEY, tg_id INTEGER, quiz_id INTEGER, answer_number INTEGER)''')
     c.execute('''CREATE TABLE IF NOT EXISTS events
-                 (id INTEGER PRIMARY KEY, name TEXT, date TEXT,description TEXT)''')
+                 (id INTEGER PRIMARY KEY, name TEXT, date TEXT,description TEXT, file_id TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS newsletters
                  (id INTEGER PRIMARY KEY, text TEXT, sender_id INTEGER)''')
     c.execute('''CREATE TABLE IF NOT EXISTS banned_users
@@ -69,10 +69,10 @@ def add_request(tg_id):
     conn.commit()
     conn.close()
 
-def add_event(name, date, description):
+def add_event(name, date, description, file_id):
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
-    c.execute("INSERT INTO events (name, date, description) VALUES (?, ?, ?)", (name, date,description))
+    c.execute("INSERT INTO events (name, date, description, file_id) VALUES (?, ?, ?, ?)", (name, date, description, file_id))
     conn.commit()
     conn.close()
 
@@ -341,10 +341,10 @@ def delete_quiz(quiz_id):
     conn.commit()
     conn.close()
 
-def edit_event(event_id, name, date,description):
+def edit_event(event_id, name, date, description, file_id):
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
-    c.execute("UPDATE events SET name = ?, date = ?, description = ? WHERE id = ?", (name, date,description, event_id))
+    c.execute("UPDATE events SET name = ?, date = ?, description = ?, file_id = ? WHERE id = ?", (name, date,description, file_id, event_id))
     conn.commit()
     conn.close()
 
@@ -372,7 +372,7 @@ def delete_resource(resource_id):
 def isAdmin(user_id):
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
-    c.execute("SELECT * FROM admins WHERE id = ?", (user_id,))
+    c.execute("SELECT * FROM admins WHERE tg_id = ?", (user_id,))
     if len(c.fetchone())>0:
         conn.commit()
         conn.close()

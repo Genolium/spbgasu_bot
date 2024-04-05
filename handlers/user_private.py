@@ -9,6 +9,7 @@ from utility.util import *
 from utility.states import *
 from os import getenv
 from dotenv import find_dotenv, load_dotenv
+from keyboardrs.admin_keyboards import fake_user_keyboard
 from keyboardrs.usr_keyboards import *
 
 user_router = Router()
@@ -39,25 +40,29 @@ async def buy_list(message: types.Message):
     buttons=[]
     for event in events:
         buttons.append(types.InlineKeyboardButton(text=f'🗓️  {event[1]} - {event[2]}',callback_data=f'event_{event[0]}'))
-    event_keyborad = types.InlineKeyboardMarkup(inline_keyboard=chunk_list(buttons,1))
-    await message.answer_photo(photo=image, caption='<b>📢Календарь мероприятий</b> содержит даты и названия ближайших <b>событий/мероприятий</b> вуза 🏫.\nДля подробной информации выбирай ниже👇',reply_markup=event_keyborad, parse_mode=ParseMode.HTML)
+    keyboard = types.InlineKeyboardMarkup(inline_keyboard=chunk_list(buttons,1))
+    await message.answer_photo(photo=image, caption='<b>📢Календарь мероприятий</b> содержит даты и названия ближайших <b>событий/мероприятий</b> вуза 🏫.\nДля подробной информации выбирай ниже👇',reply_markup=keyboard, parse_mode=ParseMode.HTML)
 
 
 @user_router.callback_query(F.data.startswith("event_"))
 async def show_event_description(call: types.CallbackQuery):
     data = call.data.split('_')
     if(data[1]!='back'):
-        description = get_event(event_id=data[1])[0][3]
-        if call.message.text:
-            await call.message.edit_text(str(description), parse_mode=ParseMode.HTML)
-        else:
-            await call.message.answer(str(description), parse_mode=ParseMode.HTML)
+        event = get_event(event_id=data[1])[0]
+        name, date, description = event[1], event[2], event[3]
+        msg_text = f"<b>{name}</b> - <b>{date}</b>\n\n{description}"
+        buttons=[]
+        buttons.append(types.InlineKeyboardButton(text='⬅️ Назад', callback_data='event_back'))
+        keyboard = types.InlineKeyboardMarkup(inline_keyboard=chunk_list(buttons,1))
+        await bot.send_photo(call.message.chat.id, photo=event[4],
+                             caption=msg_text, reply_markup=keyboard, parse_mode=ParseMode.HTML)
     else:
         await bot.delete_message(call.message.chat.id, call.message.message_id)
         
 # ID    
 @user_router.message(Command('id'))
 async def print_usr_id(message: types.Message):
+
     await message.answer(f"{message.from_user.id}")
 
 # НАПИСАТЬ ОБРАЩЕНИЕ В СТУДСОВЕТ
@@ -74,7 +79,7 @@ async def message_to_admins(message: types.Message,state: FSMContext):
 @user_router.message(Ask_Admin_States.waiting_for_question)
 async def forward_message_to_admins(message: types.Message, state: FSMContext):
     if(message.text == "Отмена"):
-        await message.answer("❌Отправка сообщения *отменена*\.",parse_mode=ParseMode.MARKDOWN_V2, reply_markup=main_keyboard)
+        await message.answer("❌Отправка сообщения *отменена*\.",parse_mode=ParseMode.MARKDOWN_V2, reply_markup=(main_keyboard, fake_user_keyboard)[isAdmin(message.from_user.id)])
         await state.clear()
     else: 
         load_dotenv(find_dotenv())
@@ -84,7 +89,7 @@ async def forward_message_to_admins(message: types.Message, state: FSMContext):
         forwarded_message =  await message.forward(getenv('ADMIN_GROUP_ID'))
         if forwarded_message.forward_from == None:
             await bot.send_message(chat_id=getenv("ADMIN_GROUP_ID"),text=f"Новое сообщение от пользователя, который скрыл свой профиль при пересылке, с id {message.from_user.id}\nСсылка на пользователя: <a href='tg://user?id={a}'>ссылка</a>", parse_mode=ParseMode.HTML)
-        await message.answer("✅*Сообщение успешно отправлено* в Студенческий совет и уже обрабатывается, время ответа зависит от количества заявок\.",parse_mode=ParseMode.MARKDOWN_V2, reply_markup=main_keyboard)
+        await message.answer("✅*Сообщение успешно отправлено* в Студенческий совет и уже обрабатывается, время ответа зависит от количества заявок\.",parse_mode=ParseMode.MARKDOWN_V2, reply_markup=(main_keyboard, fake_user_keyboard)[isAdmin(message.from_user.id)])
         await state.clear()
 
 
