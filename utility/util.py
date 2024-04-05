@@ -12,6 +12,7 @@ load_dotenv(find_dotenv())
 bot = Bot(token=getenv('TOKEN'))
 dp = Dispatcher(storage=MemoryStorage())
 ADMIN_GROUP_ID = getenv("ADMIN_GROUP_ID")
+FLASK_SITE_ADDRESS = getenv("FLASK_SITE_ADDRESS")
 
 async def on_startup(dp):
     commands = [

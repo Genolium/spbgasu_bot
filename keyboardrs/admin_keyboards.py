@@ -4,8 +4,8 @@ from aiogram import types
 admin_buttons = [
     [types.KeyboardButton(text="🗳️Создать опрос")],
     [types.KeyboardButton(text="📨Создать рассылку")],
-    [types.KeyboardButton(text="📋Список администраторов")],
     [types.KeyboardButton(text="🫥Режим пользователя")],
+    [types.KeyboardButton(text="☁️Открыть сайт")],
     [types.KeyboardButton(text="⚙️Расширенные настройки")]
 ]
 

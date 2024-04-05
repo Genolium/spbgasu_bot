@@ -23,12 +23,7 @@ def create_db():
                  (id INTEGER PRIMARY KEY, text TEXT, sender_id INTEGER)''')
     c.execute('''CREATE TABLE IF NOT EXISTS banned_users
                  (id INTEGER PRIMARY KEY, tg_id INTEGER)''')
-    conn.commit()
-    try:
-        c.execute("INSERT INTO admins (tg_id, username, login, password) VALUES (?, ?, ?, ?)", (349646233, "Васюнин И.", "admin", generate_password_hash("AdminPassword222")))
-        conn.commit()
-    except:
-        print("Стандартный логин админа уже добавлен")
+    conn.commit()    
     conn.close()
 
 def add_user(tg_id):

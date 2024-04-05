@@ -32,8 +32,10 @@
 <p><code>TOKEN=</code></p>
 
 <p><code>ADMIN_GROUP_ID=</code></p>
+
+<p><code>FLASK_SITE_ADDRESS=</code></p>
    
-   - TOKEN - токен вашего бота, ADMIN_GROUP_ID - ID чата (группы) в Telegram, в который он будет пересылать сообщения администрации (Как узнать ID чата telegram: https://dzen.ru/a/Y8mvM0IEN0exrcSu).
+   - TOKEN - токен вашего бота, ADMIN_GROUP_ID - ID чата (группы) в Telegram, в который он будет пересылать сообщения администрации (Как узнать ID чата telegram: https://dzen.ru/a/Y8mvM0IEN0exrcSu), FLASK_SITE_ADDRESS - адрес сайта - админ панели (http/https).
    - Необходимо после = ввести соотвутствующие данные.
 
 ## Использование

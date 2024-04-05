@@ -305,6 +305,7 @@ async def advanced_options(message: types.Message, state:FSMContext):
 async def advanced_options(message: types.Message, state:FSMContext):
     await state.clear()
     await message.answer("👉Вы *перешли* в режим простого пользователя\.",reply_markup=fake_user_keyboard, parse_mode=ParseMode.MARKDOWN_V2)
+
 # ВЫХОД ИЗ РЕЖИМА ПОЛЬЗОВАТЕЛЯ    
 @admin_private_router.message(F.text == "Вернуться⏪")
 async def advanced_options(message: types.Message, state:FSMContext):
@@ -336,3 +337,10 @@ async def change_photo_3(message: types.Message, state: FSMContext):
     edit_event(event[0],event[1],event[2],event[3],file_id)
     await message.answer(f"✅Фото мероприятия было обновлено.",reply_markup=advanced_keyboard)
     await state.clear()
+    
+#ОТКРЫТЬ САЙТ
+@admin_private_router.message(F.text == "☁️Открыть сайт")
+async def open_website(message: types.Message, state:FSMContext):
+    link_button = types.InlineKeyboardButton(text='🔗Ссылка', url=FLASK_SITE_ADDRESS)
+    keyboard = types.InlineKeyboardMarkup(inline_keyboard=[[link_button]])
+    await message.answer('Нажми на кнопку, чтобы перейти по ссылке', reply_markup=keyboard)
