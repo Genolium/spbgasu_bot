@@ -69,7 +69,7 @@ def admin_management():
             add_admin(tg_id, username, login, password)
         elif 'delete_admin' in request.form:
             tg_id = request.form['tg_id']
-            delete_admin((tg_id))
+            delete_admin(tg_id)
     admins = get_all_admins()
     return render_template('admin_management.html', admins=admins)
 

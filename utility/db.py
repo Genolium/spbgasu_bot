@@ -114,7 +114,7 @@ def add_admin(tg_id, username, login, password):
 def delete_admin(tg_id):
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
-    c.execute("DELETE FROM admins WHERE tg_id = ?", (int(tg_id),))
+    c.execute("DELETE FROM admins WHERE tg_id = ?", (int(str(tg_id)),))
     conn.commit()
     conn.close()
 
