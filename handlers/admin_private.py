@@ -316,16 +316,27 @@ async def advanced_options(message: types.Message, state:FSMContext):
 @admin_private_router.message(F.text == "🖋️🎥Изменить фото в мероприятии")
 async def change_photo_1(message: types.Message, state: FSMContext):
     await state.clear()
-    await message.answer("📷Введите id мероприятия, у которого вы хотите изменить обложку\:", parse_mode=ParseMode.MARKDOWN_V2)
+    await message.answer("📷Введите id мероприятия, у которого вы хотите изменить обложку\:",
+                         reply_markup=types.ReplyKeyboardMarkup(keyboard=[cancel_button], resize_keyboard=True),parse_mode=ParseMode.MARKDOWN_V2)
     await state.set_state(Change_Photo_States.waiting_for_num)
 
 @admin_private_router.message(Change_Photo_States.waiting_for_num)
 async def change_photo_2(message: types.Message, state: FSMContext):
     await state.clear()
-    if get_event(message.text):
+    if message.text == "⏪ Отменить":
+        await message.answer(f"Изменение обложки отменено",reply_markup=advanced_keyboard)
+        await state.clear()
+    event = get_event(message.text)
+    if event:
+        event = event[0]
         await state.update_data(id=message.text)
-        await message.answer("📷Пришлите новое *фото* для обложки мероприятия\:", parse_mode=ParseMode.MARKDOWN_V2)
+        await message.answer(f"Вы решили изменить обложку для мероприятия: \n\n<b>Название:</b> {event[1]}\n<b>Дата:</b> {event[2]}\n<b>Описание:</b> {event[3]}",
+                             parse_mode=ParseMode.HTML)
+        await message.answer("📷Пришлите новое *фото* для обложки мероприятия\. \n\nЕсли вы хотите убрать обложку мепоприятия, нажмите на кнопку внизу",
+            reply_markup=types.ReplyKeyboardMarkup(keyboard=[cancel_button, remove_photo_button], resize_keyboard=True), parse_mode=ParseMode.MARKDOWN_V2)
         await state.set_state(Change_Photo_States.waiting_for_new_photo)
+    else:
+        await message.answer(f"Похоже, мероприятия с таким Id не существует. Повторите ввод")
 
 @admin_private_router.message(Change_Photo_States.waiting_for_new_photo,F.content_type == types.ContentType.PHOTO)
 async def change_photo_3(message: types.Message, state: FSMContext):
@@ -337,6 +348,19 @@ async def change_photo_3(message: types.Message, state: FSMContext):
     edit_event(event[0],event[1],event[2],event[3],file_id)
     await message.answer(f"✅Фото мероприятия было обновлено.",reply_markup=advanced_keyboard)
     await state.clear()
+    
+@admin_private_router.message(Change_Photo_States.waiting_for_new_photo,F.content_type == types.ContentType.TEXT)
+async def change_photo_3(message: types.Message, state: FSMContext):
+    if message.text=="❗️Убрать обложку❗️":
+        user_data = await state.get_data()
+        id=user_data["id"]
+        event = get_event(id)[0]
+        edit_event(event[0],event[1],event[2],event[3],None)
+        await message.answer(f"✅Обложка мероприятия была удалена!",reply_markup=advanced_keyboard)
+        await state.clear()
+    if message.text == "⏪ Отменить":
+        await message.answer(f"Изменение обложки отменено",reply_markup=advanced_keyboard)
+        await state.clear()
     
 #ОТКРЫТЬ САЙТ
 @admin_private_router.message(F.text == "☁️Открыть сайт")

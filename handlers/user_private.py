@@ -54,8 +54,11 @@ async def show_event_description(call: types.CallbackQuery):
         buttons=[]
         buttons.append(types.InlineKeyboardButton(text='⬅️ Назад', callback_data='event_back'))
         keyboard = types.InlineKeyboardMarkup(inline_keyboard=chunk_list(buttons,1))
-        await bot.send_photo(call.message.chat.id, photo=event[4],
+        if event[4]:
+            await bot.send_photo(call.message.chat.id, photo=event[4],
                              caption=msg_text, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+        else:
+            await bot.send_message(call.message.chat.id,msg_text, reply_markup=keyboard, parse_mode=ParseMode.HTML)
     else:
         await bot.delete_message(call.message.chat.id, call.message.message_id)
         

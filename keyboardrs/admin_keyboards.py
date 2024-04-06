@@ -22,3 +22,6 @@ fake_user_buttons = [
 ]
 
 fake_user_keyboard = types.ReplyKeyboardMarkup(keyboard=fake_user_buttons, resize_keyboard=True)
+
+remove_photo_button = [types.KeyboardButton(text="❗️Убрать обложку❗️")]
+cancel_button = [types.KeyboardButton(text="⏪ Отменить")]

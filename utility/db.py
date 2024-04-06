@@ -368,7 +368,8 @@ def isAdmin(user_id):
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
     c.execute("SELECT * FROM admins WHERE tg_id = ?", (user_id,))
-    if len(c.fetchone())>0:
+    a = c.fetchone()
+    if a and len(a)>0:
         conn.commit()
         conn.close()
         return True
