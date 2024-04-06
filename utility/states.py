@@ -38,3 +38,7 @@ class Quiz_Creation_States(StatesGroup):
 class Change_Photo_States(StatesGroup):
     waiting_for_num=State()
     waiting_for_new_photo=State()
+    
+class ChangeCredentials(StatesGroup):
+    waiting_for_login = State()
+    waiting_for_password = State()

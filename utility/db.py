@@ -328,6 +328,13 @@ def edit_quiz(quiz_id, question, answer_options):
     c.execute("UPDATE quizes SET question = ?, answer_options = ? WHERE id = ?", (question, answer_options, quiz_id))
     conn.commit()
     conn.close()
+    
+def edit_admin(tg_id, login, password):
+    conn = sqlite3.connect('my_database.db')
+    c = conn.cursor()
+    c.execute("UPDATE admins SET login = ?, password = ? WHERE tg_id = ?", (login, generate_password_hash(password), tg_id))
+    conn.commit()
+    conn.close()
 
 def delete_quiz(quiz_id):
     conn = sqlite3.connect('my_database.db')

@@ -6,6 +6,7 @@ advanced_buttons = [
     [types.KeyboardButton(text="🖋️🎥Изменить фото в мероприятии")],
     [types.KeyboardButton(text="📋Список администраторов")],
     [types.KeyboardButton(text="📌❓Добавить вопрос в FAQ📝")],
+    [types.KeyboardButton(text="🖋️Изменить свои учетные данные")],
     [types.KeyboardButton(text="📝Добавить администратора")],
     [types.KeyboardButton(text="🗑️Удалить администратора по id")],    
 ]

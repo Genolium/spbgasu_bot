@@ -115,16 +115,15 @@ async def get_newsletter_content(message: types.Message, state: FSMContext):
     if message.text and message.text.lower()=="отмена":
         await message.answer("✅Создание рассылки *отменено*\.", parse_mode=ParseMode.MARKDOWN_V2,reply_markup=admin_keyboard)
         await state.clear()
-        return
-     
-    keyboard = types.InlineKeyboardMarkup(row_width=2,inline_keyboard=[
-        [
-            types.InlineKeyboardButton(text="✅Отправить рассылку", callback_data="send_newsletter"),
-            types.InlineKeyboardButton(text="❌Отмена", callback_data="cancel_newsletter")
-        ]
-    ])
-    await message.answer(f"⚠️Пожалуйста,подтвердите отправку сообщения👇", reply_markup=keyboard)
-    await state.set_state(NewsletterStates.confirm_newsletter)
+    else:     
+        keyboard = types.InlineKeyboardMarkup(row_width=2,inline_keyboard=[
+            [
+                types.InlineKeyboardButton(text="✅Отправить рассылку", callback_data="send_newsletter"),
+                types.InlineKeyboardButton(text="❌Отмена", callback_data="cancel_newsletter")
+            ]
+        ])
+        await message.answer(f"⚠️Пожалуйста,подтвердите отправку сообщения👇", reply_markup=keyboard)
+        await state.set_state(NewsletterStates.confirm_newsletter)
 
 @admin_private_router.callback_query(F.data == "send_newsletter")
 async def confirm_newsletter(call: types.CallbackQuery, state: FSMContext):
@@ -326,6 +325,7 @@ async def change_photo_2(message: types.Message, state: FSMContext):
     if message.text == "⏪ Отменить":
         await message.answer(f"Изменение обложки отменено",reply_markup=advanced_keyboard)
         await state.clear()
+        return
     event = get_event(message.text)
     if event:
         event = event[0]
@@ -368,3 +368,34 @@ async def open_website(message: types.Message, state:FSMContext):
     link_button = types.InlineKeyboardButton(text='🔗Ссылка', url=FLASK_SITE_ADDRESS)
     keyboard = types.InlineKeyboardMarkup(inline_keyboard=[[link_button]])
     await message.answer('Нажми на кнопку, чтобы перейти по ссылке', reply_markup=keyboard)
+
+#ИЗМЕНЕНИЕ УЧЁТКИ
+@admin_private_router.message(F.text == "🖋️Изменить свои учетные данные")
+async def change_password(message: types.Message, state:FSMContext):
+    await message.answer('Введите новый логин (для отмены нажмите на кнопку внизу)', reply_markup=types.ReplyKeyboardMarkup(keyboard=[cancel_button], resize_keyboard=True))
+    await state.set_state(ChangeCredentials.waiting_for_login)
+
+@admin_private_router.message(ChangeCredentials.waiting_for_login)
+async def process_login(message: types.Message, state: FSMContext):
+    if message.text == "⏪ Отменить":
+        await message.answer(f"Изменение учетных данных отменено",reply_markup=advanced_keyboard)
+        await state.clear()
+    else:
+        login = message.text
+        await state.update_data(login=login)
+        await message.answer('Введите новый пароль (для выхода нажмите на кнопку внизу)', reply_markup=types.ReplyKeyboardMarkup(keyboard=[cancel_button], resize_keyboard=True))
+        await state.set_state(ChangeCredentials.waiting_for_password)
+
+@admin_private_router.message(ChangeCredentials.waiting_for_password)
+async def process_password(message: types.Message, state: FSMContext):
+    if message.text == "⏪ Отменить":
+        await message.answer(f"Изменение учетных данных отменено",reply_markup=advanced_keyboard)
+        await state.clear()
+    else:
+        password = message.text
+        data = await state.get_data()
+        login = data.get('login')
+        tg_id = message.from_user.id
+        edit_admin(tg_id, login, password)
+        await message.answer('Ваши учетные данные успешно обновлены!',reply_markup=advanced_keyboard)
+        await state.clear()
