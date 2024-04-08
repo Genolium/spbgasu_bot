@@ -237,8 +237,12 @@ async def quiz_creation_question(message: types.Message, state: FSMContext):
     else:
         await message.answer("✅Вопрос *добавлен*\.", parse_mode=ParseMode.MARKDOWN_V2)
         await message.answer("👉*Выберите действие* на клавиатуре⌨️\.",reply_markup=quiz_keyboard, parse_mode=ParseMode.MARKDOWN_V2)
-        await state.update_data(txt=(f"_q{message.text}_q"))
         await state.set_state(Quiz_Creation_States.waiting_for_actions)
+        st = await state.get_data()
+        try:
+            await state.update_data(txt=(st["txt"]+f"_q{message.text}_q"))    
+        except:
+            await state.update_data(txt=(f"{message.text}_q"))
         
 
 @admin_private_router.message(Quiz_Creation_States.waiting_for_actions)
@@ -255,14 +259,21 @@ async def quiz_actions(message: types.Message,state:FSMContext):
         send_keyboard = types.ReplyKeyboardMarkup(keyboard=send_buttons, resize_keyboard=True)
         await message.answer("✅Создание опроса *успешно завершено*\. Выберите действие на клавиатуре⌨️\.",reply_markup=send_keyboard, parse_mode=ParseMode.MARKDOWN_V2)
         await state.set_state(Quiz_Creation_States.waiting_for_send)
+    elif(message.text=="📝Добавить новый вопрос"):
+        await message.answer("✍️Напишите *вопрос*\.",
+            reply_markup=types.reply_keyboard_remove.ReplyKeyboardRemove(), parse_mode=ParseMode.MARKDOWN_V2)
+        await state.set_state(Quiz_Creation_States.waiting_for_question)
 
 @admin_private_router.message(Quiz_Creation_States.waiting_for_answer)
 async def quiz_creation_answer(message: types.Message, state:FSMContext):
-    await message.answer("✅Ответ *успешно* добавлен\.",reply_markup=quiz_keyboard, parse_mode=ParseMode.MARKDOWN_V2 )
-    await message.answer("Выберите *действие* на клавиатуре⌨️", parse_mode=ParseMode.MARKDOWN_V2)
-    st = await state.get_data()
-    await state.update_data(txt=st["txt"]+f"{message.text};")
-    await state.set_state(Quiz_Creation_States.waiting_for_actions)
+    if ';' in message.text:
+        await message.answer("❌Отмена в ответе нельзя использовать символ ;")
+    else:
+        await message.answer("✅Ответ *успешно* добавлен\.",reply_markup=quiz_keyboard, parse_mode=ParseMode.MARKDOWN_V2 )
+        await message.answer("Выберите *действие* на клавиатуре⌨️", parse_mode=ParseMode.MARKDOWN_V2)
+        st = await state.get_data()
+        await state.update_data(txt=st["txt"]+f"{message.text};")
+        await state.set_state(Quiz_Creation_States.waiting_for_actions)
 
 @admin_private_router.message(Quiz_Creation_States.waiting_for_send)
 async def send_quiz(message: types.Message, state: FSMContext):
@@ -270,21 +281,33 @@ async def send_quiz(message: types.Message, state: FSMContext):
         await message.answer("✅Рассылка опроса *успешно* отменена\.",reply_markup=admin_keyboard, parse_mode=ParseMode.MARKDOWN_V2)
     elif message.text=="📢Сделать рассылку опроса":
             data = await state.get_data()
-            quiz_question = data["txt"].split("_q")[1]
-            quiz_answers = data["txt"].split("_q")[2]
-            id = add_quiz(quiz_question,quiz_answers)
+            data_array = data["txt"].split("_q")
+            quiz_id = get_last_quiz()[0]+1
+            quiz_questions=[]
+            quiz_answers = []
+            for i in range(0,len(data["txt"].split("_q"))):
+                if i % 2 !=0:
+                    #data_array[i-1] текст вопроса
+                    #data_array[i] варианты ответа на вопрос
+                    quiz_questions.append(data_array[i-1])
+                    quiz_answers.append(data_array[i])
+                    add_quiz(quiz_id,data_array[i-1],data_array[i])
+           
             answer_buttons = []
-            for ans in quiz_answers.split(';'):
+            for ans in data_array[1].split(';'):
                 if len(str(ans))>0:
-                    answer_buttons.append(types.InlineKeyboardButton(text=str(ans),callback_data=f"quiz_{id}_{str(ans)}"))
+                    if(len(data_array)==2):#Если в опросе всего один вопрос
+                        answer_buttons.append(types.InlineKeyboardButton(text=str(ans),callback_data=f"quiz_{quiz_id}_{str(ans)}"))
+                    else:
+                        answer_buttons.append(types.InlineKeyboardButton(text=str(ans),callback_data=f"quiz_{quiz_id}_{str(ans)}_0_{len(quiz_questions)}"))
             answer_keyboard = types.InlineKeyboardMarkup(inline_keyboard=chunk_list(answer_buttons,1))
             for user in get_all_users():
                 if user[0] not in (f[1] for f in getAllBannedUsers()):
                     try: 
                         await bot.send_message(chat_id=user[0],text="📢🚨_Вам пришел новый опрос от Студсовета_\.📪", parse_mode=ParseMode.MARKDOWN_V2)
-                        await bot.send_message(chat_id=user[0],text=f"{quiz_question}",reply_markup=answer_keyboard)              
+                        await bot.send_message(chat_id=user[0],text=f"{quiz_questions[0]}",reply_markup=answer_keyboard)              
                     except:
-                        print(f"❌*Не удалось отправить* сообщение пользователю с id {user[0]}\.", parse_mode=ParseMode.MARKDOWN_V2)
+                        message.answer(f"❌*Не удалось отправить* сообщение пользователю с id {user[0]}\.", parse_mode=ParseMode.MARKDOWN_V2)
             await message.answer("✅Опрос *успешно* разослан всем пользователям\.",reply_markup=admin_keyboard, parse_mode=ParseMode.MARKDOWN_V2)
             await state.clear()
 

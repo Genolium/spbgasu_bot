@@ -159,7 +159,36 @@ async def contact_list(message: types.Message,state: FSMContext):
 # ОТВЕТ НА ОПРОСНИК
 @user_router.callback_query(F.data.startswith("quiz_"))
 async def send_response(call: types.CallbackQuery):
+    #0    1  2      3                4 
+    #quiz_ID_ОТВЕТ_{ИНДЕКС ВОПРОСА}_{СКОЛЬКО ВОПРОСОВ В ОПРОСЕ}
+    #0    1  2      3                4                           5
+    #quiz_ID_ОТВЕТ_{ИНДЕКС ВОПРОСА}_{СКОЛЬКО ВОПРОСОВ В ОПРОСЕ}_{ВЫБРАННЫЕ ОТВЕТЫ}
+    
     data = call.data.split("_")
-    add_quiz_response(call.from_user.id,data[1],data[2])
-    await call.message.edit_reply_markup()
-    await call.message.answer("Спасибо за ваш ответ!😊")
+    if(len(data)==3):#если в опросе всего один вопрос
+        add_quiz_response(call.from_user.id,data[1],data[2])
+        await call.message.edit_reply_markup()
+        await call.message.edit_text("Спасибо за ваш ответ!😊")
+    else:
+        quiz_id = int(data[1])
+        quiz_list = get_quiz(str(quiz_id))
+        question_index = int(data[3])
+        question_len = int(data[4])
+        print(len(data))
+        if(len(data)==6):
+            choosed_answers = data[5]
+        if(question_index==question_len-1):#Если это последний вопрос
+            add_quiz_response(call.from_user.id,quiz_id,f'{choosed_answers}{data[2]}')
+            await call.message.edit_reply_markup()
+            await call.message.edit_text("Спасибо за ваш ответ!😊")
+        else:
+            answer_buttons=[]
+            for ans in quiz_list[question_index+1][2].split(";"):
+                if len(str(ans))>0:
+                    if(len(data)==6):
+                        answer_buttons.append(types.InlineKeyboardButton(text=str(ans),callback_data=f"quiz_{quiz_id}_{str(ans)}_{question_index+1}_{question_len}_{choosed_answers}{data[2]};"))
+                    else:
+                        answer_buttons.append(types.InlineKeyboardButton(text=str(ans),callback_data=f"quiz_{quiz_id}_{str(ans)}_{question_index+1}_{question_len}_{data[2]};"))
+            answer_keyboard = types.InlineKeyboardMarkup(inline_keyboard=chunk_list(answer_buttons,1))
+            await call.message.edit_reply_markup()
+            await call.message.edit_text(f'{quiz_list[question_index+1][1]}',reply_markup=answer_keyboard)
