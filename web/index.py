@@ -106,10 +106,28 @@ def quiz():
         # Получаем выбранный опрос из формы
         selected_quiz = int(request.form['quiz'])
         quiz_results = get_quiz_results(selected_quiz)
-        chart = generate_chart(quiz_results)
-        quiz_name = get_quiz_name(selected_quiz)
-        people = sum(list(row[1] for row in quiz_results))
-        return render_template('quiz.html', chart=chart, quiz_name=quiz_name, people=people)
+        l = get_quiz(selected_quiz)
+        if len(l)==1:
+            chart = generate_chart(quiz_results)
+            quiz_name = get_quiz_name(selected_quiz)
+            people = sum(list(row[1] for row in quiz_results))
+            return render_template('quiz.html', chart=chart, quiz_name=quiz_name, people=people)
+        else:
+            quiz_results = get_quiz_results_no_group(selected_quiz)
+            res = []
+            counter = 0
+            for i in l: 
+                k = [] 
+                for j in i[2].split(';'):
+                    c=0
+                    if j is not '':     
+                        for s in quiz_results:
+                            if j == s[0].split(';')[counter]:
+                                c+=1
+                        k.append((j,c)) 
+                res.append((generate_chart(k), i[1], sum(list(row[1] for row in k))))  
+                counter += 1       
+            return render_template('quiz.html', res=res)
     else:
         # Получаем список опросов
         quiz_list = get_quiz_list()

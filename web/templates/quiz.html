@@ -18,7 +18,7 @@
 
         {% if quiz_list %}
         <form method="post">
-            <label for="quiz">Выберите опрос:</label>
+            <label for="quiz">Выберите опрос (в списке отображается только первый вопрос опроса)</label>
             <select class="form-select" id="quiz" name="quiz">
                 {% for quiz_id, quiz_name in quiz_list %}
                 <option value="{{ quiz_id }}">{{ quiz_name }}</option>
@@ -28,7 +28,7 @@
             <button class="btn btn-dark my-2" type="submit">Посмотреть результаты</button>
         </form>
         {% endif %}
-        {% if not quiz_list and not chart %}
+        {% if not quiz_list and not chart and not res %}
         <p>К сожалению, опросов ещё не было. Перейдите в бот, чтобы создать новый опрос</p>
         {% endif %}
 
@@ -39,6 +39,17 @@
         <div class="text-right">
             <a href="quiz" class="btn btn-dark my-2">Вернуться</a>
         </div>
+        {% endif %}
+
+        {% if res %}
+        <h5>Проголосовавших: {{ res[0][2] }}</h5>
+            {% for i in res %}
+                <h2>{{ i[1] }}</h2>
+                <img class="img img-fluid" style="max-height:600px;" src="data:image/png;base64,{{ i[0] }}" alt="Quiz Results Chart">       
+            {% endfor %}
+            <div class="text-right">
+                <a href="quiz" class="btn btn-dark my-2">Вернуться</a>
+            </div>
         {% endif %}
     </div>
 

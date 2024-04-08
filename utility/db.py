@@ -14,7 +14,7 @@ def create_db():
     c.execute('''CREATE TABLE IF NOT EXISTS faq
                  (id INTEGER PRIMARY KEY, question_group TEXT, question TEXT, answer TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS quizes
-                 (quiz_id INTEGER, question TEXT, answer_options TEXT)''')
+                 (id INTEGER PRIMARY KEY, quiz_id INTEGER, question TEXT, answer_options TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS quizes_responces
                  (id INTEGER PRIMARY KEY, tg_id INTEGER, quiz_id INTEGER, answer_number INTEGER)''')
     c.execute('''CREATE TABLE IF NOT EXISTS events
@@ -127,7 +127,7 @@ def get_pass_hash(login):
 def get_quiz_list():
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
-    c.execute("SELECT id, question FROM quizes")
+    c.execute("SELECT quiz_id, MIN(question) AS question FROM quizes GROUP BY quiz_id")
     quizes = c.fetchall()
     conn.close()
     return quizes
@@ -159,11 +159,18 @@ def get_last_quiz():
     conn.close()
     return last_record
 
-# Функция для получения результатов выбранного опроса
 def get_quiz_results(quiz_id):
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
     c.execute("SELECT answer_number, COUNT(*) as count FROM quizes_responces WHERE quiz_id = ? GROUP BY answer_number", (quiz_id,))
+    results = c.fetchall()
+    conn.close()
+    return results
+
+def get_quiz_results_no_group(quiz_id):
+    conn = sqlite3.connect('my_database.db')
+    c = conn.cursor()
+    c.execute("SELECT answer_number FROM quizes_responces WHERE quiz_id = ?", (quiz_id,))
     results = c.fetchall()
     conn.close()
     return results
