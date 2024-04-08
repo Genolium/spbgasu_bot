@@ -14,7 +14,7 @@ def create_db():
     c.execute('''CREATE TABLE IF NOT EXISTS faq
                  (id INTEGER PRIMARY KEY, question_group TEXT, question TEXT, answer TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS quizes
-                 (id INTEGER PRIMARY KEY, question TEXT, answer_options TEXT)''')
+                 (quiz_id INTEGER, question TEXT, answer_options TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS quizes_responces
                  (id INTEGER PRIMARY KEY, tg_id INTEGER, quiz_id INTEGER, answer_number INTEGER)''')
     c.execute('''CREATE TABLE IF NOT EXISTS events
@@ -41,14 +41,12 @@ def add_faq(question_group, question, answer):
     conn.commit()
     conn.close()
 
-def add_quiz(question, answer_options):
+def add_quiz(quiz_id,question, answer_options):
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
-    c.execute("INSERT INTO quizes (question, answer_options) VALUES (?, ?)", (question, answer_options))
-    quiz_id = c.lastrowid
+    c.execute("INSERT INTO quizes (quiz_id, question, answer_options) VALUES (? ,?, ?)", (quiz_id,question, answer_options))
     conn.commit()
     conn.close()
-    return quiz_id
 
 def add_quiz_response(tg_id, quiz_id, answer_number):
     conn = sqlite3.connect('my_database.db')
@@ -114,7 +112,7 @@ def add_admin(tg_id, username, login, password):
 def delete_admin(tg_id):
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
-    c.execute("DELETE FROM admins WHERE tg_id = ?", (int(str(tg_id)),))
+    c.execute("DELETE FROM admins WHERE tg_id = ?", (int(tg_id),))
     conn.commit()
     conn.close()
 
@@ -152,6 +150,14 @@ def getAllBannedUsers():
     users = c.fetchall()
     conn.close()
     return users
+
+def get_last_quiz():
+    conn = sqlite3.connect('my_database.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM quizes ORDER BY quiz_id DESC LIMIT 1")
+    last_record = c.fetchone()
+    conn.close()
+    return last_record
 
 # Функция для получения результатов выбранного опроса
 def get_quiz_results(quiz_id):
@@ -224,7 +230,7 @@ def get_quiz(quiz_id=None):
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
     if quiz_id:
-        c.execute("SELECT * FROM quizes WHERE id = ?", (quiz_id,))
+        c.execute("SELECT * FROM quizes WHERE quiz_id = ?", (quiz_id,))
     else:
         c.execute("SELECT * FROM quizes")
     a = c.fetchall()
