@@ -38,13 +38,20 @@
    - TOKEN - токен вашего бота, ADMIN_GROUP_ID - ID чата (группы) в Telegram, в который он будет пересылать сообщения администрации (Как узнать ID чата telegram: https://dzen.ru/a/Y8mvM0IEN0exrcSu), FLASK_SITE_ADDRESS - адрес сайта - админ панели (http/https).
    - Необходимо после = ввести соотвутствующие данные.
 
-## Использование
+## Использование без Docker
 
 Для запуска телеграм-бота:
 python main.py
 
 Для запуска веб-приложения:
 python main.py web
+
+## Запуск с Docker
+
+В командной строке в папке проекта просписать:
+<p><code>docker-compose up</code></p>
+
+<p><code>docker-compose build</code></p>
 
 ## Структура проекта
 

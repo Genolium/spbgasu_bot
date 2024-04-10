@@ -120,7 +120,7 @@ def quiz():
                 k = [] 
                 for j in i[2].split(';'):
                     c=0
-                    if j is not '':     
+                    if j != '':     
                         for s in quiz_results:
                             if j == s[0].split(';')[counter]:
                                 c+=1

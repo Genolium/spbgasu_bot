@@ -22,7 +22,7 @@ async def run_bot():
     await dp.start_polling(bot, on_startup=on_startup)
 
 async def run_web():
-    await app.run(debug=True)
+    await app.run(debug=False, host='0.0.0.0', port=5000)
 
 async def main():
     create_db()
