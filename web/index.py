@@ -1,10 +1,9 @@
-from flask import Flask, send_file, render_template, request, redirect, url_for, make_response
+import os
+from flask import Flask, render_template, request, redirect, url_for, make_response
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 from utility.db import *
 from utility.util import *
-import pandas as pd
-import os
 
 # СОЗДАНИЕ ВЕБ-ПРИЛОЖЕНИЯ НА FLASK
 app = Flask(__name__)
@@ -28,8 +27,12 @@ def index():
 @auth.login_required
 def users():    
     users_list = get_all_users()
-    banned_users = getAllBannedUsers()  
-    return render_template('users.html', users=users_list, banned_users=list((f[1] for f in banned_users)))
+    banned_users = getAllBannedUsers()
+    try:
+        BOT_URL = os.environ['BOT_URL']
+    except:
+        BOT_URL = ""
+    return render_template('users.html', bot_url=BOT_URL, users=users_list, banned_users=list((f[1] for f in banned_users)))
 
 @app.route('/faq', methods=['GET', 'POST'])
 @auth.login_required
@@ -73,22 +76,25 @@ def admin_management():
     admins = get_all_admins()
     return render_template('admin_management.html', admins=admins)
 
-# Главная страница со списком событий и формой для добавления/редактирования
 @app.route('/events', methods=['GET', 'POST'])
 @auth.login_required
-def events():
+async def events():
     if request.method == 'POST':
         name = request.form['name']
         date = request.form['date']
         description = request.form['description']
-        event_id = request.form['event_id']        
+        event_id = request.form['event_id']
+        file_id=None
         
         if event_id:
             # Обновление существующего события
-            edit_event(event_id, name, date,description)
+            edit_event(event_id, name, date, description, file_id)
         else:
-            add_event(name,date,description)
+            # Добавление нового события
+            add_event(name, date, description, file_id)
+        
         return redirect('/events')
+    
     events = get_event()
     return render_template('events.html', events=events)
 

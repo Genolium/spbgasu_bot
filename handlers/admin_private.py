@@ -1,9 +1,8 @@
 #           ОБРАБОТКА АДМИНСКИХ КОМАНД
-from aiogram import types,Router,F
+from aiogram import types,Router,F,flags
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import CommandStart, CommandObject
 from aiogram.enums import ParseMode
-from datetime import date
 from werkzeug.security import generate_password_hash
 from filters.is_admin import IsAdminIDFilter
 from keyboardrs.admin_keyboards import *
@@ -18,6 +17,7 @@ admin_private_router.message.filter(IsAdminIDFilter())
 
 # ПРИВЕТСТВИЕ
 @admin_private_router.message(CommandStart())
+@flags.chat_action(action="typing")
 async def start_cmd(message: types.Message, command: CommandObject, state:FSMContext):
     await state.clear()
     args = command.args
@@ -32,6 +32,7 @@ async def start_cmd(message: types.Message, command: CommandObject, state:FSMCon
 
 # ВЫВОД СПИСКА АДМИНОВ
 @admin_private_router.message(F.text == "📋Список администраторов")
+@flags.chat_action(action="typing")
 async def admin_list(message: types.Message, state:FSMContext):
     await state.clear()
     l = ""
@@ -126,6 +127,7 @@ async def get_newsletter_content(message: types.Message, state: FSMContext):
         await state.set_state(NewsletterStates.confirm_newsletter)
 
 @admin_private_router.callback_query(F.data == "send_newsletter")
+@flags.chat_action(action="typing")
 async def confirm_newsletter(call: types.CallbackQuery, state: FSMContext):
     user_data = await state.get_data()
     message = user_data["content"]
@@ -276,6 +278,7 @@ async def quiz_creation_answer(message: types.Message, state:FSMContext):
         await state.set_state(Quiz_Creation_States.waiting_for_actions)
 
 @admin_private_router.message(Quiz_Creation_States.waiting_for_send)
+@flags.chat_action(action="typing")
 async def send_quiz(message: types.Message, state: FSMContext):
     if(message.text=="❌Отмена"):
         await message.answer("✅Рассылка опроса *успешно* отменена\.",reply_markup=admin_keyboard, parse_mode=ParseMode.MARKDOWN_V2)

@@ -15,7 +15,7 @@ from keyboardrs.usr_keyboards import *
 user_router = Router()
 
 @user_router.message(CommandStart())
-@flags.chat_action(action="upload_photo", interval=3)
+@flags.chat_action(action="upload_photo")
 async def cmd_start(message: types.Message, state: FSMContext):
     await state.clear()
     image = FSInputFile("static/Post.jpg")
@@ -33,6 +33,7 @@ async def cmd_start(message: types.Message, state: FSMContext):
 
 # КАЛЕНДАРЬ МЕРОПРИЯТИЙ
 @user_router.message(F.text=='Календарь мероприятий🗓️')
+@flags.chat_action(action="typing")
 async def buy_list(message: types.Message):
     image = FSInputFile("static/Events.jpg")
     events = get_event()
@@ -45,6 +46,7 @@ async def buy_list(message: types.Message):
 
 
 @user_router.callback_query(F.data.startswith("event_"))
+@flags.chat_action(action="typing")
 async def show_event_description(call: types.CallbackQuery):
     data = call.data.split('_')
     if(data[1]!='back'):
@@ -64,12 +66,13 @@ async def show_event_description(call: types.CallbackQuery):
         
 # ID    
 @user_router.message(Command('id'))
+@flags.chat_action(action="typing")
 async def print_usr_id(message: types.Message):
-
     await message.answer(f"{message.from_user.id}")
 
 # НАПИСАТЬ ОБРАЩЕНИЕ В СТУДСОВЕТ
 @user_router.message(F.text == "Написать обращение в студсовет✍")
+@flags.chat_action(action="typing")
 async def message_to_admins(message: types.Message,state: FSMContext):
     cancel_button = [
         [types.KeyboardButton(text="Отмена")],
@@ -80,6 +83,7 @@ async def message_to_admins(message: types.Message,state: FSMContext):
     await state.set_state(Ask_Admin_States.waiting_for_question)
 
 @user_router.message(Ask_Admin_States.waiting_for_question)
+@flags.chat_action(action="typing")
 async def forward_message_to_admins(message: types.Message, state: FSMContext):
     if(message.text == "Отмена"):
         await message.answer("❌Отправка сообщения *отменена*\.",parse_mode=ParseMode.MARKDOWN_V2, reply_markup=(main_keyboard, fake_user_keyboard)[isAdmin(message.from_user.id)])
@@ -89,15 +93,19 @@ async def forward_message_to_admins(message: types.Message, state: FSMContext):
         a = message.from_user.id
         button_url = f'tg://user?id={a}'
         markup = types.InlineKeyboardMarkup(inline_keyboard=[[types.InlineKeyboardButton(text="Ссылка", url=button_url)]])
-        forwarded_message =  await message.forward(getenv('ADMIN_GROUP_ID'))
-        if forwarded_message.forward_from == None:
-            await bot.send_message(chat_id=getenv("ADMIN_GROUP_ID"),text=f"Новое сообщение от пользователя, который скрыл свой профиль при пересылке, с id {message.from_user.id}\nСсылка на пользователя: <a href='tg://user?id={a}'>ссылка</a>", parse_mode=ParseMode.HTML)
-        await message.answer("✅*Сообщение успешно отправлено* в Студенческий совет и уже обрабатывается, время ответа зависит от количества заявок\.",parse_mode=ParseMode.MARKDOWN_V2, reply_markup=(main_keyboard, fake_user_keyboard)[isAdmin(message.from_user.id)])
+        try:
+            forwarded_message =  await message.forward(getenv('ADMIN_GROUP_ID'))
+            if forwarded_message.forward_from == None:
+                await bot.send_message(chat_id=getenv("ADMIN_GROUP_ID"),text=f"Новое сообщение от пользователя, который скрыл свой профиль при пересылке, с id {message.from_user.id}\nСсылка на пользователя: <a href='tg://user?id={a}'>ссылка</a>", parse_mode=ParseMode.HTML)
+            await message.answer("✅*Сообщение успешно отправлено* в Студенческий совет и уже обрабатывается, время ответа зависит от количества заявок\.",parse_mode=ParseMode.MARKDOWN_V2, reply_markup=(main_keyboard, fake_user_keyboard)[isAdmin(message.from_user.id)])
+        except:
+            await message.answer("Ваше сообщение НЕ отправлено, пожалуйста, попробуйте позже",parse_mode=ParseMode.MARKDOWN_V2, reply_markup=(main_keyboard, fake_user_keyboard)[isAdmin(message.from_user.id)])
         await state.clear()
 
 
 # Получение списка групп вопросов FAQ
 @user_router.message(F.text=='FAQ📋')
+@flags.chat_action(action="typing")
 async def show_faq_groups(message: types.Message, state: FSMContext):
     await state.clear()
     groups = get_faq_groups()
@@ -109,6 +117,7 @@ async def show_faq_groups(message: types.Message, state: FSMContext):
     await message.answer_photo(photo=image, caption='В разделе *FAQ*, собраны часто задаваемые вопросы студентов,выбери интересующий тебя раздел\n\n👇Выбери раздел вопросов:',parse_mode=ParseMode.MARKDOWN_V2,reply_markup=keyboard)
 
 @user_router.callback_query(F.data.startswith('faq_'))
+@flags.chat_action(action="typing")
 async def show_faq_questions(call: types.CallbackQuery):
     data = call.data.split('_')
     if len(data)==2:
@@ -147,6 +156,7 @@ async def show_faq_questions(call: types.CallbackQuery):
             await call.message.answer(reply_markup=keyboard)
 
 @user_router.message(F.text=='Наши контакты📞')
+@flags.chat_action(action="typing")
 async def contact_list(message: types.Message,state: FSMContext):
     await state.clear()
     image = FSInputFile("static/Nets.jpg")
@@ -158,6 +168,7 @@ async def contact_list(message: types.Message,state: FSMContext):
 
 # ОТВЕТ НА ОПРОСНИК
 @user_router.callback_query(F.data.startswith("quiz_"))
+@flags.chat_action(action="typing")
 async def send_response(call: types.CallbackQuery):
     #0    1  2      3                4 
     #quiz_ID_ОТВЕТ_{ИНДЕКС ВОПРОСА}_{СКОЛЬКО ВОПРОСОВ В ОПРОСЕ}

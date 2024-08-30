@@ -23,7 +23,17 @@ def create_db():
                  (id INTEGER PRIMARY KEY, text TEXT, sender_id INTEGER)''')
     c.execute('''CREATE TABLE IF NOT EXISTS banned_users
                  (id INTEGER PRIMARY KEY, tg_id INTEGER)''')
-    conn.commit()    
+
+    # Проверка, пуста ли таблица admins
+    c.execute("SELECT COUNT(*) FROM admins")
+    count = c.fetchone()[0]
+    
+    # Если таблица пуста, добавляем основного администратора
+    if count == 0:
+        c.execute("INSERT INTO admins (tg_id, username, login, password) VALUES (?, ?, ?, ?)",
+                  (349646233, "Основной админ (УДАЛИТЬ)", "admin", generate_password_hash("admin")))
+
+    conn.commit()
     conn.close()
 
 def add_user(tg_id):
@@ -112,8 +122,16 @@ def add_admin(tg_id, username, login, password):
 def delete_admin(tg_id):
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
-    c.execute("DELETE FROM admins WHERE tg_id = ?", (int(tg_id),))
-    conn.commit()
+
+    # Проверяем общее количество администраторов
+    c.execute("SELECT COUNT(*) FROM admins")
+    total_admins = c.fetchone()[0]
+
+    if total_admins > 1:
+        # Если администраторов больше одного, удаляем указанного
+        c.execute("DELETE FROM admins WHERE tg_id = ?", (int(tg_id),))
+        conn.commit()
+    
     conn.close()
 
 def get_pass_hash(login):

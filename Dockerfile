@@ -20,3 +20,6 @@ COPY . .
 
 # Открываем порт для Flask сайта
 EXPOSE 5000
+
+# Запускаем Python файл
+CMD ["python", "main.py"]

@@ -2,8 +2,10 @@ import io, base64
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 import pandas as pd
+from functools import wraps
 from matplotlib import rcParams
 from aiogram import Bot, Dispatcher, types
+from aiogram.utils.chat_action import ChatActionMiddleware
 from aiogram.fsm.storage.memory import MemoryStorage
 from os import getenv
 from dotenv import find_dotenv, load_dotenv
@@ -11,6 +13,7 @@ from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
 bot = Bot(token=getenv('TOKEN'))
 dp = Dispatcher(storage=MemoryStorage())
+dp.message.middleware(ChatActionMiddleware())
 ADMIN_GROUP_ID = getenv("ADMIN_GROUP_ID")
 FLASK_SITE_ADDRESS = getenv("FLASK_SITE_ADDRESS")
 
@@ -20,8 +23,8 @@ async def on_startup(dp):
         types.BotCommand(command="/help", description="Помощь"),
         # Другие команды здесь
     ]
-    await bot.set_my_commands(commands)
-  
+    await bot.set_my_commands(commands)  
+
 def chunk_list(lst, n):
     return [lst[i:i+n] for i in range(0, len(lst), n)]
 
